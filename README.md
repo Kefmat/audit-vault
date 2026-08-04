@@ -1,4 +1,4 @@
-# Audit Vault 🛡️
+# Audit Vault
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
@@ -9,41 +9,41 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Configuration](#configuration)
-- [Usage](#-usage)
+- [Usage](#usage)
   - [Quick Start](#quick-start)
   - [API Examples](#api-examples)
-- [Security & Compliance](#-security--compliance)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Security & Compliance](#security--compliance)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **Audit Vault** provides centralized, immutable event tracking and cryptographic verification for sensitive enterprise actions. Built for compliance, security operations, and system auditing, Audit Vault ensures all recorded events remain verifiable, transparent, and tamper-proof.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- 🔒 **Cryptographic Immutability**: Uses Merkle tree structures and SHA-256 hashing to guarantee log integrity.
-- ⚡ **High Throughput**: Optimized for low-latency ingest and streaming event processing.
-- 🛡️ **Role-Based Access Control (RBAC)**: Strict permission boundaries for reading, auditing, and administering logs.
-- 📊 **Compliance-Ready**: Designed to meet requirements for SOC2, HIPAA, ISO 27001, and GDPR audit trails.
-- 🔌 **Seamless Integrations**: Out-of-the-box connectors for Webhooks, SIEM tools, and Cloud Storage.
+- **Cryptographic Immutability**: Uses Merkle tree structures and SHA-256 hashing to guarantee log integrity.
+- **High Throughput**: Optimized for low-latency ingest and streaming event processing.
+- **Role-Based Access Control (RBAC)**: Strict permission boundaries for reading, auditing, and administering logs.
+- **Compliance-Ready**: Designed to meet requirements for SOC2, HIPAA, ISO 27001, and GDPR audit trails.
+- **Seamless Integrations**: Out-of-the-box connectors for Webhooks, SIEM tools, and Cloud Storage.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -57,7 +57,7 @@ flowchart TD
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -69,7 +69,7 @@ flowchart TD
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-org/audit-vault.git
+git clone https://github.com/Kefmat/audit-vault.git
 cd audit-vault
 npm install # or go mod download
 ```
@@ -93,7 +93,7 @@ STORAGE_DRIVER=postgres # options: postgres, s3, local
 
 ---
 
-## 💻 Usage
+## Usage
 
 ### Quick Start
 
@@ -131,13 +131,13 @@ curl -X GET http://localhost:8080/v1/audit/verify \
 
 ---
 
-## 🔒 Security & Compliance
+## Security & Compliance
 
 If you discover a security vulnerability within Audit Vault, please submit a report to `security@example.com` or create a confidential disclosure.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting a Pull Request.
 
@@ -149,6 +149,6 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) gu
 
 ---
 
-## 📜 License
+## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
