@@ -40,6 +40,8 @@ yarn-debug.log*
 yarn-error.log*
 *.sqlite
 *.db
+__pycache__/
+vault_log.jsonl
 
 # IDE and Editor Files
 .vscode/
