@@ -1,0 +1,156 @@
+"""HTTP REST API server for Audit Vault."""
+
+import json
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+from typing import Optional
+
+from src.storage.base import VaultStorage
+from src.types import AuditEvent
+from src.merkle import MerkleTree
+
+
+class AuditVaultRequestHandler(BaseHTTPRequestHandler):
+    storage: VaultStorage = None  # Injected before server start
+    api_token: Optional[str] = None  # Injected bearer token requirement
+
+    def _send_response_json(self, status_code: int, payload: dict) -> None:
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_OPTIONS(self) -> None:
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
+
+    def _check_auth(self) -> bool:
+        if not self.api_token:
+            return True
+        auth_header = self.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:].strip()
+            return token == self.api_token
+        return False
+
+    def do_GET(self) -> None:
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path.rstrip("/")
+        query_params = parse_qs(parsed_url.query)
+
+        if path == "/health":
+            self._send_response_json(200, {
+                "status": "healthy",
+                "service": "audit-vault",
+                "version": "1.0.0"
+            })
+            return
+
+        if not self._check_auth():
+            self._send_response_json(401, {"error": "Unauthorized", "message": "Invalid or missing Bearer token"})
+            return
+
+        if path == "/v1/audit/events":
+            events = self.storage.get_all_events()
+            actor_filter = query_params.get("actor", [None])[0]
+            action_filter = query_params.get("action", [None])[0]
+
+            filtered = events
+            if actor_filter:
+                filtered = [e for e in filtered if e.actor == actor_filter]
+            if action_filter:
+                filtered = [e for e in filtered if e.action == action_filter]
+
+            self._send_response_json(200, {
+                "total": len(filtered),
+                "events": [e.to_dict() for e in filtered]
+            })
+            return
+
+        if path.startswith("/v1/audit/events/"):
+            event_id = path.replace("/v1/audit/events/", "")
+            event = self.storage.get_event_by_id(event_id)
+            if not event:
+                self._send_response_json(404, {"error": "Not Found", "message": f"Event {event_id} not found"})
+                return
+            self._send_response_json(200, event.to_dict())
+            return
+
+        if path == "/v1/audit/verify":
+            verification = self.storage.verify_integrity()
+            self._send_response_json(200 if verification.valid else 409, verification.to_dict())
+            return
+
+        if path.startswith("/v1/audit/proof/"):
+            try:
+                index_str = path.replace("/v1/audit/proof/", "")
+                index = int(index_str)
+                events = self.storage.get_all_events()
+                hashes = [e.hash for e in events]
+                tree = MerkleTree(hashes)
+                proof = tree.get_proof(index)
+                if not proof:
+                    self._send_response_json(404, {"error": "Not Found", "message": f"Proof index {index} out of bounds"})
+                    return
+                self._send_response_json(200, proof.to_dict())
+            except ValueError:
+                self._send_response_json(400, {"error": "Bad Request", "message": "Index must be an integer"})
+            return
+
+        self._send_response_json(404, {"error": "Not Found", "message": f"Endpoint {path} not recognized"})
+
+    def do_POST(self) -> None:
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path.rstrip("/")
+
+        if not self._check_auth():
+            self._send_response_json(401, {"error": "Unauthorized", "message": "Invalid or missing Bearer token"})
+            return
+
+        if path == "/v1/audit/events":
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length == 0:
+                self._send_response_json(400, {"error": "Bad Request", "message": "Empty request body"})
+                return
+
+            try:
+                body_bytes = self.rfile.read(content_length)
+                data = json.loads(body_bytes.decode("utf-8"))
+
+                if "actor" not in data or "action" not in data or "target" not in data:
+                    self._send_response_json(400, {
+                        "error": "Bad Request",
+                        "message": "Fields 'actor', 'action', and 'target' are required."
+                    })
+                    return
+
+                event = AuditEvent.from_dict(data)
+                stored_event = self.storage.append_event(event)
+
+                self._send_response_json(201, {
+                    "status": "success",
+                    "event": stored_event.to_dict()
+                })
+            except Exception as err:
+                self._send_response_json(400, {"error": "Bad Request", "message": str(err)})
+            return
+
+        self._send_response_json(404, {"error": "Not Found", "message": f"Endpoint {path} not recognized"})
+
+
+def create_server(host: str, port: int, storage: VaultStorage, api_token: Optional[str] = None) -> HTTPServer:
+    class ConfiguredHandler(AuditVaultRequestHandler):
+        pass
+
+    ConfiguredHandler.storage = storage
+    ConfiguredHandler.api_token = api_token
+    server = HTTPServer((host, port), ConfiguredHandler)
+    return server
