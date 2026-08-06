@@ -80,6 +80,18 @@ class TestVaultStorage(unittest.TestCase):
         self.assertEqual(paged_events[0].actor, "bob")
         self.assertEqual(paged_events[1].actor, "alice")
 
+    def test_get_proof_for_event(self):
+        storage = MemoryVaultStorage()
+        ev1 = storage.append_event(AuditEvent(actor="u1", action="a1", target="t1"))
+        ev2 = storage.append_event(AuditEvent(actor="u2", action="a2", target="t2"))
+
+        proof = storage.get_proof_for_event(ev1.event_id)
+        self.assertIsNotNone(proof)
+        self.assertEqual(proof.leaf_hash, ev1.hash)
+
+        # Non-existent event proof returns None
+        self.assertIsNone(storage.get_proof_for_event("non-existent-id"))
+
 
 if __name__ == "__main__":
     unittest.main()

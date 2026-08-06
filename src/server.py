@@ -6,7 +6,7 @@ from urllib.parse import urlparse, parse_qs
 from typing import Optional
 
 from src.storage.base import VaultStorage
-from src.types import AuditEvent
+from src.types import AuditEvent, MerkleProof
 from src.merkle import MerkleTree
 
 
@@ -104,6 +104,15 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
+        if path.startswith("/v1/audit/events/") and path.endswith("/proof"):
+            event_id = path[len("/v1/audit/events/"): -len("/proof")]
+            proof = self.storage.get_proof_for_event(event_id)
+            if not proof:
+                self._send_response_json(404, {"error": "Not Found", "message": f"Proof for event {event_id} not found"})
+                return
+            self._send_response_json(200, proof.to_dict())
+            return
+
         if path.startswith("/v1/audit/events/"):
             event_id = path.replace("/v1/audit/events/", "")
             event = self.storage.get_event_by_id(event_id)
@@ -142,6 +151,30 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
 
         if not self._check_auth():
             self._send_response_json(401, {"error": "Unauthorized", "message": "Invalid or missing Bearer token"})
+            return
+
+        if path == "/v1/audit/proof/verify":
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length == 0:
+                self._send_response_json(400, {"error": "Bad Request", "message": "Empty request body"})
+                return
+
+            try:
+                body_bytes = self.rfile.read(content_length)
+                data = json.loads(body_bytes.decode("utf-8"))
+                raw_proof = data.get("proof", data)
+                proof = MerkleProof(
+                    leaf_hash=raw_proof["leaf_hash"],
+                    root_hash=raw_proof["root_hash"],
+                    proof=raw_proof["proof"]
+                )
+                valid = MerkleTree.verify_proof(proof)
+                self._send_response_json(200, {
+                    "valid": valid,
+                    "message": "Merkle proof is valid" if valid else "Merkle proof verification failed"
+                })
+            except Exception as err:
+                self._send_response_json(400, {"error": "Bad Request", "message": str(err)})
             return
 
         if path == "/v1/audit/events":

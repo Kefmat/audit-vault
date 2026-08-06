@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from src.types import AuditEvent, VerificationResult
+from src.types import AuditEvent, VerificationResult, MerkleProof
 
 
 class VaultStorage(ABC):
@@ -28,6 +28,11 @@ class VaultStorage(ABC):
     @abstractmethod
     def get_event_by_id(self, event_id: str) -> Optional[AuditEvent]:
         """Retrieves a single event by ID."""
+        pass
+
+    @abstractmethod
+    def get_proof_for_event(self, event_id: str) -> Optional[MerkleProof]:
+        """Generates a Merkle inclusion proof for a given event ID."""
         pass
 
     @abstractmethod

@@ -90,6 +90,35 @@ class TestAuditVaultAPI(unittest.TestCase):
         self.assertEqual(data["limit"], 1)
         self.assertEqual(data["offset"], 0)
 
+    def test_event_proof_lookup_and_verification_endpoint(self):
+        status, post_res = self._make_request(
+            "/v1/audit/events",
+            method="POST",
+            body={"actor": "proof_user", "action": "login", "target": "auth"},
+            token=self.api_token
+        )
+        event_id = post_res["event"]["event_id"]
+
+        # Fetch proof via event_id
+        status, proof_data = self._make_request(
+            f"/v1/audit/events/{event_id}/proof",
+            method="GET",
+            token=self.api_token
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("leaf_hash", proof_data)
+        self.assertIn("root_hash", proof_data)
+
+        # Verify proof via POST endpoint
+        status, verify_res = self._make_request(
+            "/v1/audit/proof/verify",
+            method="POST",
+            body={"proof": proof_data},
+            token=self.api_token
+        )
+        self.assertEqual(status, 200)
+        self.assertTrue(verify_res["valid"])
+
 
 if __name__ == "__main__":
     unittest.main()
