@@ -78,6 +78,18 @@ class TestAuditVaultAPI(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(data["valid"])
 
+    def test_events_pagination_and_query_params(self):
+        # Post two more events
+        self._make_request("/v1/audit/events", method="POST", body={"actor": "actor_a", "action": "read", "target": "t1"}, token=self.api_token)
+        self._make_request("/v1/audit/events", method="POST", body={"actor": "actor_b", "action": "write", "target": "t2"}, token=self.api_token)
+
+        # Test limit & offset
+        status, data = self._make_request("/v1/audit/events?limit=1&offset=0", method="GET", token=self.api_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(data["limit"], 1)
+        self.assertEqual(data["offset"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

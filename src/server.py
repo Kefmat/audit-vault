@@ -59,19 +59,48 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/v1/audit/events":
-            events = self.storage.get_all_events()
             actor_filter = query_params.get("actor", [None])[0]
             action_filter = query_params.get("action", [None])[0]
 
-            filtered = events
-            if actor_filter:
-                filtered = [e for e in filtered if e.actor == actor_filter]
-            if action_filter:
-                filtered = [e for e in filtered if e.action == action_filter]
+            since_val = query_params.get("since", [None])[0]
+            until_val = query_params.get("until", [None])[0]
+            limit_val = query_params.get("limit", [None])[0]
+            offset_val = query_params.get("offset", [None])[0]
+
+            try:
+                since = float(since_val) if since_val is not None else None
+                until = float(until_val) if until_val is not None else None
+                limit = int(limit_val) if limit_val is not None else None
+                offset = int(offset_val) if offset_val is not None else 0
+            except ValueError:
+                self._send_response_json(400, {
+                    "error": "Bad Request",
+                    "message": "Invalid format for numeric query parameters (since, until, limit, offset)."
+                })
+                return
+
+            matching_events = self.storage.get_all_events(
+                actor=actor_filter,
+                action=action_filter,
+                since=since,
+                until=until
+            )
+
+            paginated_events = self.storage.get_all_events(
+                actor=actor_filter,
+                action=action_filter,
+                since=since,
+                until=until,
+                limit=limit,
+                offset=offset
+            )
 
             self._send_response_json(200, {
-                "total": len(filtered),
-                "events": [e.to_dict() for e in filtered]
+                "total": len(matching_events),
+                "count": len(paginated_events),
+                "offset": offset,
+                "limit": limit,
+                "events": [e.to_dict() for e in paginated_events]
             })
             return
 

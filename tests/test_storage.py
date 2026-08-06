@@ -57,5 +57,29 @@ class TestVaultStorage(unittest.TestCase):
                 os.remove(tmp_path)
 
 
+    def test_storage_pagination_and_filtering(self):
+        storage = MemoryVaultStorage()
+        storage.append_event(AuditEvent(actor="alice", action="read", target="doc1", timestamp=100.0))
+        storage.append_event(AuditEvent(actor="bob", action="write", target="doc2", timestamp=200.0))
+        storage.append_event(AuditEvent(actor="alice", action="write", target="doc3", timestamp=300.0))
+        storage.append_event(AuditEvent(actor="charlie", action="read", target="doc4", timestamp=400.0))
+
+        # Filter by actor
+        alice_events = storage.get_all_events(actor="alice")
+        self.assertEqual(len(alice_events), 2)
+
+        # Filter by timestamp range
+        range_events = storage.get_all_events(since=150.0, until=350.0)
+        self.assertEqual(len(range_events), 2)
+        self.assertEqual(range_events[0].actor, "bob")
+        self.assertEqual(range_events[1].actor, "alice")
+
+        # Pagination
+        paged_events = storage.get_all_events(limit=2, offset=1)
+        self.assertEqual(len(paged_events), 2)
+        self.assertEqual(paged_events[0].actor, "bob")
+        self.assertEqual(paged_events[1].actor, "alice")
+
+
 if __name__ == "__main__":
     unittest.main()

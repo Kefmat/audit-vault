@@ -48,8 +48,30 @@ class FileVaultStorage(VaultStorage):
 
         return event
 
-    def get_all_events(self) -> List[AuditEvent]:
-        return list(self._events)
+    def get_all_events(
+        self,
+        actor: Optional[str] = None,
+        action: Optional[str] = None,
+        since: Optional[float] = None,
+        until: Optional[float] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[AuditEvent]:
+        filtered = self._events
+        if actor is not None:
+            filtered = [e for e in filtered if e.actor == actor]
+        if action is not None:
+            filtered = [e for e in filtered if e.action == action]
+        if since is not None:
+            filtered = [e for e in filtered if e.timestamp >= since]
+        if until is not None:
+            filtered = [e for e in filtered if e.timestamp <= until]
+
+        start = offset if (offset is not None and offset > 0) else 0
+        if limit is not None and limit >= 0:
+            end = start + limit
+            return list(filtered[start:end])
+        return list(filtered[start:])
 
     def get_event_by_id(self, event_id: str) -> Optional[AuditEvent]:
         return self._event_index.get(event_id)

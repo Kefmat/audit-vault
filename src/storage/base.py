@@ -13,8 +13,16 @@ class VaultStorage(ABC):
         pass
 
     @abstractmethod
-    def get_all_events(self) -> List[AuditEvent]:
-        """Returns all events in append order."""
+    def get_all_events(
+        self,
+        actor: Optional[str] = None,
+        action: Optional[str] = None,
+        since: Optional[float] = None,
+        until: Optional[float] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[AuditEvent]:
+        """Returns events in append order, with optional filtering and pagination."""
         pass
 
     @abstractmethod
