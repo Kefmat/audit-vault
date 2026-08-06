@@ -3,6 +3,7 @@
 import os
 import unittest
 import tempfile
+import threading
 from src.storage.memory import MemoryVaultStorage
 from src.storage.file import FileVaultStorage
 from src.types import AuditEvent
@@ -56,7 +57,6 @@ class TestVaultStorage(unittest.TestCase):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
-
     def test_storage_pagination_and_filtering(self):
         storage = MemoryVaultStorage()
         storage.append_event(AuditEvent(actor="alice", action="read", target="doc1", timestamp=100.0))
@@ -91,6 +91,30 @@ class TestVaultStorage(unittest.TestCase):
 
         # Non-existent event proof returns None
         self.assertIsNone(storage.get_proof_for_event("non-existent-id"))
+
+    def test_concurrent_append_events(self):
+        storage = MemoryVaultStorage()
+        threads = []
+
+        def worker(thread_id: int):
+            for i in range(10):
+                storage.append_event(AuditEvent(
+                    actor=f"worker_{thread_id}",
+                    action="write",
+                    target=f"target_{i}"
+                ))
+
+        for t_id in range(5):
+            t = threading.Thread(target=worker, args=(t_id,))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        self.assertEqual(len(storage.get_all_events()), 50)
+        verification = storage.verify_integrity()
+        self.assertTrue(verification.valid)
 
 
 if __name__ == "__main__":

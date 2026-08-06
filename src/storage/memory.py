@@ -1,5 +1,6 @@
 """In-memory vault storage driver."""
 
+import threading
 from typing import List, Optional, Dict
 from src.storage.base import VaultStorage
 from src.types import AuditEvent, VerificationResult, MerkleProof
@@ -12,17 +13,19 @@ class MemoryVaultStorage(VaultStorage):
     def __init__(self):
         self._events: List[AuditEvent] = []
         self._event_index: Dict[str, AuditEvent] = {}
+        self._lock = threading.RLock()
 
     def append_event(self, event: AuditEvent) -> AuditEvent:
-        if self._events:
-            event.previous_hash = self._events[-1].hash
-        else:
-            event.previous_hash = "GENESIS_BLOCK_PREVIOUS_HASH"
+        with self._lock:
+            if self._events:
+                event.previous_hash = self._events[-1].hash
+            else:
+                event.previous_hash = "GENESIS_BLOCK_PREVIOUS_HASH"
 
-        event.hash = compute_event_hash(event)
-        self._events.append(event)
-        self._event_index[event.event_id] = event
-        return event
+            event.hash = compute_event_hash(event)
+            self._events.append(event)
+            self._event_index[event.event_id] = event
+            return event
 
     def get_all_events(
         self,
@@ -33,7 +36,9 @@ class MemoryVaultStorage(VaultStorage):
         limit: Optional[int] = None,
         offset: Optional[int] = None,
     ) -> List[AuditEvent]:
-        filtered = self._events
+        with self._lock:
+            filtered = list(self._events)
+
         if actor is not None:
             filtered = [e for e in filtered if e.actor == actor]
         if action is not None:
@@ -50,20 +55,25 @@ class MemoryVaultStorage(VaultStorage):
         return list(filtered[start:])
 
     def get_event_by_id(self, event_id: str) -> Optional[AuditEvent]:
-        return self._event_index.get(event_id)
+        with self._lock:
+            return self._event_index.get(event_id)
 
     def get_proof_for_event(self, event_id: str) -> Optional[MerkleProof]:
-        if event_id not in self._event_index:
-            return None
-        idx = next((i for i, e in enumerate(self._events) if e.event_id == event_id), -1)
-        if idx == -1:
-            return None
-        hashes = [e.hash for e in self._events]
+        with self._lock:
+            if event_id not in self._event_index:
+                return None
+            idx = next((i for i, e in enumerate(self._events) if e.event_id == event_id), -1)
+            if idx == -1:
+                return None
+            hashes = [e.hash for e in self._events]
         tree = MerkleTree(hashes)
         return tree.get_proof(idx)
 
     def verify_integrity(self) -> VerificationResult:
-        if not self._events:
+        with self._lock:
+            events_copy = list(self._events)
+
+        if not events_copy:
             return VerificationResult(
                 valid=True,
                 total_events=0,
@@ -74,11 +84,11 @@ class MemoryVaultStorage(VaultStorage):
         expected_prev_hash = "GENESIS_BLOCK_PREVIOUS_HASH"
         hashes = []
 
-        for idx, event in enumerate(self._events):
+        for idx, event in enumerate(events_copy):
             if event.previous_hash != expected_prev_hash:
                 return VerificationResult(
                     valid=False,
-                    total_events=len(self._events),
+                    total_events=len(events_copy),
                     merkle_root="",
                     message=f"Broken hash chain at event index {idx}.",
                     tampered_event_id=event.event_id
@@ -88,7 +98,7 @@ class MemoryVaultStorage(VaultStorage):
             if event.hash != computed_hash:
                 return VerificationResult(
                     valid=False,
-                    total_events=len(self._events),
+                    total_events=len(events_copy),
                     merkle_root="",
                     message=f"Tampered hash detected at event index {idx}.",
                     tampered_event_id=event.event_id
@@ -101,7 +111,7 @@ class MemoryVaultStorage(VaultStorage):
 
         return VerificationResult(
             valid=True,
-            total_events=len(self._events),
+            total_events=len(events_copy),
             merkle_root=tree.root,
             message="Vault integrity verified. Chain and Merkle root intact."
         )
