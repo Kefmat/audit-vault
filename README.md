@@ -1,10 +1,5 @@
 # Audit Vault
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Security Audited](https://img.shields.io/badge/security-audited-blue.svg)]()
-
 > A secure, high-performance, and tamper-evident audit logging and vault system designed for modern cloud and enterprise applications.
 
 ---
