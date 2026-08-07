@@ -15,6 +15,7 @@ from src.server import create_server
 def main():
     load_dotenv()
 
+    host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", 8080))
     storage_driver = os.environ.get("STORAGE_DRIVER", "memory").lower()
     api_token = os.environ.get("API_TOKEN", "dev-api-token-12345")
@@ -27,8 +28,8 @@ def main():
         storage = MemoryVaultStorage()
         print("[Audit Vault] Initialized in-memory storage driver")
 
-    server = create_server("0.0.0.0", port, storage, api_token=api_token)
-    print(f"[Audit Vault] Service running on http://0.0.0.0:{port}")
+    server = create_server(host, port, storage, api_token=api_token)
+    print(f"[Audit Vault] Service running on http://{host}:{port}")
     print(f"[Audit Vault] API Auth Token: {api_token}")
 
     try:
