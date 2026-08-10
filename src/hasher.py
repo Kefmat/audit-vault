@@ -30,3 +30,8 @@ def compute_pair_hash(left_hash: str, right_hash: str) -> str:
     """Computes SHA-256 hash of two node hashes concatenated."""
     combined = (left_hash + right_hash).encode('utf-8')
     return hashlib.sha256(combined).hexdigest()
+
+
+def hash_string(value: str) -> str:
+    """Computes SHA-256 hash of an arbitrary UTF-8 string."""
+    return hashlib.sha256(value.encode('utf-8')).hexdigest()
