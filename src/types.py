@@ -20,6 +20,18 @@ class AuditEvent:
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
+    def validate(self) -> None:
+        """Raises ValueError if required fields are blank."""
+        for field_name in ("actor", "action", "target"):
+            if not getattr(self, field_name, "").strip():
+                raise ValueError(f"AuditEvent field '{field_name}' must not be empty.")
+
+    def __repr__(self) -> str:
+        return (
+            f"AuditEvent(event_id={self.event_id!r}, actor={self.actor!r}, "
+            f"action={self.action!r}, target={self.target!r})"
+        )
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "AuditEvent":
         return cls(
