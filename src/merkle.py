@@ -40,6 +40,11 @@ class MerkleTree:
             return ""
         return self.levels[-1][0]
 
+    @property
+    def leaf_count(self) -> int:
+        """Returns the number of leaves in the tree."""
+        return len(self.leaves)
+
     def get_proof(self, leaf_index: int) -> Optional[MerkleProof]:
         if leaf_index < 0 or leaf_index >= len(self.leaves):
             return None
@@ -69,6 +74,9 @@ class MerkleTree:
 
     @staticmethod
     def verify_proof(proof: MerkleProof) -> bool:
+        if not proof.proof:
+            # Single-leaf tree: the leaf hash must equal the root directly.
+            return proof.leaf_hash == proof.root_hash
         current = proof.leaf_hash
         for step in proof.proof:
             if step["position"] == "left":
@@ -76,3 +84,4 @@ class MerkleTree:
             else:
                 current = compute_pair_hash(current, step["hash"])
         return current == proof.root_hash
+
