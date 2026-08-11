@@ -177,6 +177,52 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
                 self._send_response_json(400, {"error": "Bad Request", "message": str(err)})
             return
 
+        if path == "/v1/audit/events/bulk":
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length == 0:
+                self._send_response_json(400, {"error": "Bad Request", "message": "Empty request body"})
+                return
+
+            try:
+                body_bytes = self.rfile.read(content_length)
+                data = json.loads(body_bytes.decode("utf-8"))
+
+                if not isinstance(data, list):
+                    self._send_response_json(400, {
+                        "error": "Bad Request",
+                        "message": "Request body must be a JSON array of events."
+                    })
+                    return
+
+                if not data:
+                    self._send_response_json(400, {
+                        "error": "Bad Request",
+                        "message": "Event list cannot be empty."
+                    })
+                    return
+
+                stored_events = []
+                # Append events under lock to preserve order cleanly if it is file-based
+                for item in data:
+                    if "actor" not in item or "action" not in item or "target" not in item:
+                        self._send_response_json(400, {
+                            "error": "Bad Request",
+                            "message": "Fields 'actor', 'action', and 'target' are required for all events."
+                        })
+                        return
+                    event = AuditEvent.from_dict(item)
+                    event.validate()
+                    stored_event = self.storage.append_event(event)
+                    stored_events.append(stored_event)
+
+                self._send_response_json(201, {
+                    "status": "success",
+                    "events": [e.to_dict() for e in stored_events]
+                })
+            except Exception as err:
+                self._send_response_json(400, {"error": "Bad Request", "message": str(err)})
+            return
+
         if path == "/v1/audit/events":
             content_length = int(self.headers.get("Content-Length", 0))
             if content_length == 0:

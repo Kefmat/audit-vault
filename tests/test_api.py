@@ -119,6 +119,18 @@ class TestAuditVaultAPI(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(verify_res["valid"])
 
+    def test_bulk_post_events(self):
+        body = [
+            {"actor": "user1", "action": "read", "target": "file1"},
+            {"actor": "user2", "action": "write", "target": "file2"}
+        ]
+        status, data = self._make_request("/v1/audit/events/bulk", method="POST", body=body, token=self.api_token)
+        self.assertEqual(status, 201)
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(len(data["events"]), 2)
+        self.assertEqual(data["events"][0]["actor"], "user1")
+        self.assertEqual(data["events"][1]["actor"], "user2")
+
 
 if __name__ == "__main__":
     unittest.main()
