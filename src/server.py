@@ -14,6 +14,11 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
     storage: VaultStorage = None  # Injected before server start
     api_token: Optional[str] = None  # Injected bearer token requirement
 
+    def log_message(self, format, *args):
+        import logging
+        logger = logging.getLogger("audit-vault")
+        logger.info("%s - %s" % (self.address_string(), format % args))
+
     def _send_response_json(self, status_code: int, payload: dict) -> None:
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status_code)
