@@ -58,6 +58,56 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
             self._send_response_json(401, {"error": "Unauthorized", "message": "Invalid or missing Bearer token"})
             return
 
+        if path == "/v1/audit/export":
+            format_val = query_params.get("format", ["json"])[0].lower()
+            actor_filter = query_params.get("actor", [None])[0]
+            action_filter = query_params.get("action", [None])[0]
+            since_val = query_params.get("since", [None])[0]
+            until_val = query_params.get("until", [None])[0]
+
+            try:
+                since = float(since_val) if since_val is not None else None
+                until = float(until_val) if until_val is not None else None
+            except ValueError:
+                self._send_response_json(400, {
+                    "error": "Bad Request",
+                    "message": "Invalid format for numeric query parameters (since, until)."
+                })
+                return
+
+            events = self.storage.get_all_events(
+                actor=actor_filter,
+                action=action_filter,
+                since=since,
+                until=until
+            )
+
+            if format_val == "csv":
+                import io
+                import csv
+                output = io.StringIO()
+                writer = csv.writer(output)
+                writer.writerow(["event_id", "actor", "action", "target", "timestamp", "previous_hash", "hash", "metadata"])
+                for e in events:
+                    writer.writerow([e.event_id, e.actor, e.action, e.target, e.timestamp, e.previous_hash, e.hash, json.dumps(e.metadata)])
+                
+                body = output.getvalue().encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Content-Disposition", "attachment; filename=audit_export.csv")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            else:
+                self._send_response_json(200, {
+                    "format": "json",
+                    "total": len(events),
+                    "events": [e.to_dict() for e in events]
+                })
+                return
+
         if path == "/v1/audit/events":
             actor_filter = query_params.get("actor", [None])[0]
             action_filter = query_params.get("action", [None])[0]

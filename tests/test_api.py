@@ -41,11 +41,19 @@ class TestAuditVaultAPI(unittest.TestCase):
         try:
             with urllib.request.urlopen(req) as resp:
                 status = resp.status
-                response_data = json.loads(resp.read().decode("utf-8"))
+                raw = resp.read().decode("utf-8")
+                try:
+                    response_data = json.loads(raw)
+                except json.JSONDecodeError:
+                    response_data = raw
                 return status, response_data
         except urllib.error.HTTPError as err:
             status = err.code
-            response_data = json.loads(err.read().decode("utf-8"))
+            raw = err.read().decode("utf-8")
+            try:
+                response_data = json.loads(raw)
+            except json.JSONDecodeError:
+                response_data = raw
             return status, response_data
 
     def test_health_check(self):
@@ -130,6 +138,18 @@ class TestAuditVaultAPI(unittest.TestCase):
         self.assertEqual(len(data["events"]), 2)
         self.assertEqual(data["events"][0]["actor"], "user1")
         self.assertEqual(data["events"][1]["actor"], "user2")
+
+    def test_export_json_and_csv(self):
+        # Test JSON export
+        status, data = self._make_request("/v1/audit/export?format=json", token=self.api_token)
+        self.assertEqual(status, 200)
+        self.assertEqual(data["format"], "json")
+        self.assertIn("events", data)
+
+        # Test CSV export
+        status, data_csv = self._make_request("/v1/audit/export?format=csv", token=self.api_token)
+        self.assertEqual(status, 200)
+        self.assertIn("event_id,actor,action,target", data_csv)
 
 
 if __name__ == "__main__":
