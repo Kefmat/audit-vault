@@ -21,10 +21,34 @@ class AuditEvent:
         return asdict(self)
 
     def validate(self) -> None:
-        """Raises ValueError if required fields are blank."""
+        """Raises ValueError if required fields are blank or invalid."""
         for field_name in ("actor", "action", "target"):
-            if not getattr(self, field_name, "").strip():
-                raise ValueError(f"AuditEvent field '{field_name}' must not be empty.")
+            val = getattr(self, field_name, "")
+            if not isinstance(val, str) or not val.strip():
+                raise ValueError(f"AuditEvent field '{field_name}' must be a non-empty string.")
+
+        if not isinstance(self.metadata, dict):
+            raise ValueError("AuditEvent metadata must be a dictionary.")
+
+        # Validate timestamp is a valid positive number and not in the far future
+        if not isinstance(self.timestamp, (int, float)) or self.timestamp <= 0:
+            raise ValueError("AuditEvent timestamp must be a positive number.")
+        
+        # Limit future timestamp to 24 hours
+        import time
+        if self.timestamp > time.time() + 86400:
+            raise ValueError("AuditEvent timestamp cannot be more than 24 hours in the future.")
+
+        # Validate serialization and size
+        import json
+        try:
+            serialized_metadata = json.dumps(self.metadata)
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"AuditEvent metadata is not JSON serializable: {e}")
+
+        if len(serialized_metadata.encode("utf-8")) > 65536:
+            raise ValueError("AuditEvent metadata size exceeds the 64KB limit.")
+
 
     def __repr__(self) -> str:
         return (

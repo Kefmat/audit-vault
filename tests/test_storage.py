@@ -116,6 +116,22 @@ class TestVaultStorage(unittest.TestCase):
         verification = storage.verify_integrity()
         self.assertTrue(verification.valid)
 
+    def test_event_validations(self):
+        storage = MemoryVaultStorage()
+        # Invalid actor
+        with self.assertRaises(ValueError):
+            storage.append_event(AuditEvent(actor="", action="a", target="t"))
+        # Invalid metadata type
+        with self.assertRaises(ValueError):
+            storage.append_event(AuditEvent(actor="u", action="a", target="t", metadata="not_a_dict"))
+        # Far future timestamp
+        with self.assertRaises(ValueError):
+            storage.append_event(AuditEvent(actor="u", action="a", target="t", timestamp=9999999999.0))
+        # Excessive metadata size (over 64KB)
+        large_metadata = {"data": "x" * 66000}
+        with self.assertRaises(ValueError):
+            storage.append_event(AuditEvent(actor="u", action="a", target="t", metadata=large_metadata))
+
 
 if __name__ == "__main__":
     unittest.main()

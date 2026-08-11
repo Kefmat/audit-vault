@@ -195,6 +195,7 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
                     return
 
                 event = AuditEvent.from_dict(data)
+                event.validate()
                 stored_event = self.storage.append_event(event)
 
                 self._send_response_json(201, {

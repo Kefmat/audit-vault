@@ -38,6 +38,7 @@ class FileVaultStorage(VaultStorage):
 
     def append_event(self, event: AuditEvent) -> AuditEvent:
         with self._lock:
+            event.validate()
             if self._events:
                 event.previous_hash = self._events[-1].hash
             else:
