@@ -1,5 +1,6 @@
 """Data models for Audit Vault."""
 
+import json
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
@@ -35,12 +36,10 @@ class AuditEvent:
             raise ValueError("AuditEvent timestamp must be a positive number.")
         
         # Limit future timestamp to 24 hours
-        import time
         if self.timestamp > time.time() + 86400:
             raise ValueError("AuditEvent timestamp cannot be more than 24 hours in the future.")
 
         # Validate serialization and size
-        import json
         try:
             serialized_metadata = json.dumps(self.metadata)
         except (TypeError, ValueError) as e:
