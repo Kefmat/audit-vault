@@ -5,6 +5,9 @@ from typing import List, Optional
 from src.types import AuditEvent, VerificationResult, MerkleProof
 
 
+GENESIS_HASH = "GENESIS_BLOCK_PREVIOUS_HASH"
+
+
 class VaultStorage(ABC):
 
     @abstractmethod

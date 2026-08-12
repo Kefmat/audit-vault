@@ -4,7 +4,7 @@ import json
 import os
 import threading
 from typing import List, Optional, Dict
-from src.storage.base import VaultStorage
+from src.storage.base import VaultStorage, GENESIS_HASH
 from src.types import AuditEvent, VerificationResult, MerkleProof
 from src.hasher import compute_event_hash
 from src.merkle import MerkleTree
@@ -42,7 +42,7 @@ class FileVaultStorage(VaultStorage):
             if self._events:
                 event.previous_hash = self._events[-1].hash
             else:
-                event.previous_hash = "GENESIS_BLOCK_PREVIOUS_HASH"
+                event.previous_hash = GENESIS_HASH
 
             event.hash = compute_event_hash(event)
             self._events.append(event)
@@ -108,7 +108,7 @@ class FileVaultStorage(VaultStorage):
                 message="Vault is empty."
             )
 
-        expected_prev_hash = "GENESIS_BLOCK_PREVIOUS_HASH"
+        expected_prev_hash = GENESIS_HASH
         hashes = []
 
         for idx, event in enumerate(events_copy):
