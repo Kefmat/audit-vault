@@ -10,6 +10,8 @@ class ConfigError(Exception):
 
 
 class Config:
+    """Configuration storage class that holds application settings parsed from environment variables."""
+
     def __init__(self):
         self.host = os.environ.get("HOST", "0.0.0.0")
         self.port_str = os.environ.get("PORT", "8080")
@@ -19,6 +21,7 @@ class Config:
         self.port = 8080
 
     def validate(self) -> None:
+        """Validates loaded configuration settings, raising ConfigError on validation failures."""
         # Validate Port
         try:
             self.port = int(self.port_str)
@@ -41,6 +44,7 @@ class Config:
 
 
 def load_config() -> Config:
+    """Loads, validates, and returns the configuration settings."""
     config = Config()
     config.validate()
     return config
