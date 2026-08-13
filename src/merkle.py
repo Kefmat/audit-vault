@@ -46,6 +46,14 @@ class MerkleTree:
         return len(self.leaves)
 
     def get_proof(self, leaf_index: int) -> Optional[MerkleProof]:
+        """Generates a Merkle proof for a given leaf index.
+
+        Args:
+            leaf_index: The index of the leaf to generate a proof for.
+
+        Returns:
+            A MerkleProof object if index is valid, else None.
+        """
         if leaf_index < 0 or leaf_index >= len(self.leaves):
             return None
 
@@ -74,6 +82,14 @@ class MerkleTree:
 
     @staticmethod
     def verify_proof(proof: MerkleProof) -> bool:
+        """Verifies a Merkle proof against its root hash.
+
+        Args:
+            proof: The MerkleProof instance to verify.
+
+        Returns:
+            True if the calculated root matches the proof's root_hash, else False.
+        """
         if not proof.proof:
             # Single-leaf tree: the leaf hash must equal the root directly.
             return proof.leaf_hash == proof.root_hash
