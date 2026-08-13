@@ -13,6 +13,11 @@ from src.storage.file import FileVaultStorage
 def main():
     parser = argparse.ArgumentParser(description="Audit Vault local utility tool.")
     parser.add_argument(
+        "--version",
+        action="version",
+        version="Audit Vault 1.0.0"
+    )
+    parser.add_argument(
         "--file",
         default="vault_log.jsonl",
         help="Path to the JSONL log file to verify (default: vault_log.jsonl)"
