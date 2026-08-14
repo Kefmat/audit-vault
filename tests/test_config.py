@@ -26,6 +26,11 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(ConfigError):
             load_config()
 
+    @patch.dict(os.environ, {"HOST": "   "})
+    def test_invalid_host(self):
+        with self.assertRaises(ConfigError):
+            load_config()
+
 
 if __name__ == "__main__":
     unittest.main()

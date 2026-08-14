@@ -38,6 +38,10 @@ class Config:
         if self.storage_driver == "file" and not self.vault_file_path:
             raise ConfigError("VAULT_FILE_PATH must be set when STORAGE_DRIVER is 'file'")
 
+        # Validate Host
+        if not self.host.strip():
+            raise ConfigError("HOST must not be empty")
+
         # Validate API Token length/strength (non-empty)
         if not self.api_token.strip():
             raise ConfigError("API_TOKEN must not be empty")
