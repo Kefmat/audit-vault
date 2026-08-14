@@ -98,6 +98,12 @@ class TestAuditVaultAPI(unittest.TestCase):
         self.assertEqual(data["limit"], 1)
         self.assertEqual(data["offset"], 0)
 
+    def test_events_invalid_pagination(self):
+        status, data = self._make_request("/v1/audit/events?limit=-1", method="GET", token=self.api_token)
+        self.assertEqual(status, 400)
+        status, data = self._make_request("/v1/audit/events?offset=-5", method="GET", token=self.api_token)
+        self.assertEqual(status, 400)
+
     def test_event_proof_lookup_and_verification_endpoint(self):
         status, post_res = self._make_request(
             "/v1/audit/events",

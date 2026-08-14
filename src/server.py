@@ -126,11 +126,15 @@ class AuditVaultRequestHandler(BaseHTTPRequestHandler):
                 since = float(since_val) if since_val is not None else None
                 until = float(until_val) if until_val is not None else None
                 limit = int(limit_val) if limit_val is not None else None
+                if limit is not None and limit < 0:
+                    raise ValueError()
                 offset = int(offset_val) if offset_val is not None else 0
+                if offset < 0:
+                    raise ValueError()
             except ValueError:
                 self._send_response_json(400, {
                     "error": "Bad Request",
-                    "message": "Invalid format for numeric query parameters (since, until, limit, offset)."
+                    "message": "Invalid format or value for numeric query parameters (since, until, limit, offset)."
                 })
                 return
 
