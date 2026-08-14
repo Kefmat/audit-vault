@@ -13,6 +13,8 @@ from src.merkle import MerkleTree
 class FileVaultStorage(VaultStorage):
 
     def __init__(self, filepath: str = "vault_log.jsonl"):
+        if os.path.exists(filepath) and os.path.isdir(filepath):
+            raise ValueError(f"Vault storage filepath '{filepath}' must be a file, not a directory.")
         self.filepath = filepath
         self._events: List[AuditEvent] = []
         self._event_index: Dict[str, AuditEvent] = {}

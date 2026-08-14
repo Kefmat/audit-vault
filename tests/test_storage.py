@@ -132,6 +132,11 @@ class TestVaultStorage(unittest.TestCase):
         with self.assertRaises(ValueError):
             storage.append_event(AuditEvent(actor="u", action="a", target="t", metadata=large_metadata))
 
+    def test_file_storage_invalid_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self.assertRaises(ValueError):
+                FileVaultStorage(filepath=tmpdir)
+
 
 if __name__ == "__main__":
     unittest.main()
