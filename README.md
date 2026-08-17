@@ -80,10 +80,13 @@ cp .env.example .env
 Configure your vault settings in `.env`:
 
 ```env
+HOST=0.0.0.0
 PORT=8080
 LOG_LEVEL=info
 VAULT_SECRET_KEY=your-secure-vault-key
-STORAGE_DRIVER=postgres # options: postgres, s3, local
+STORAGE_DRIVER=memory # options: memory, file
+VAULT_FILE_PATH=vault_log.jsonl
+API_TOKEN=your-api-token
 ```
 
 ---
