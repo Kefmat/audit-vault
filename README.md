@@ -56,7 +56,7 @@ flowchart TD
 
 ### Prerequisites
 
-- Node.js `>= 18.0.0` or Go `>= 1.21` (depending on deployment target)
+- Python `>= 3.10`
 - Docker & Docker Compose (for local development)
 
 ### Installation
