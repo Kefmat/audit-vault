@@ -101,6 +101,12 @@ Start the local server using Docker Compose:
 docker-compose up -d
 ```
 
+Or run directly with Python:
+
+```bash
+python -m src.main
+```
+
 ### API Examples
 
 #### Logging an Audit Event
