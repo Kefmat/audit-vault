@@ -66,7 +66,7 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/Kefmat/audit-vault.git
 cd audit-vault
-npm install # or go mod download
+pip install -r requirements.txt
 ```
 
 ### Configuration
