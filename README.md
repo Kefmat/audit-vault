@@ -17,6 +17,7 @@
   - [Quick Start](#quick-start)
   - [API Examples](#api-examples)
 - [Security & Compliance](#security--compliance)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
 
