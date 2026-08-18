@@ -90,6 +90,8 @@ VAULT_FILE_PATH=vault_log.jsonl
 API_TOKEN=your-api-token
 ```
 
+> **Note**: Set `STORAGE_DRIVER=file` and configure `VAULT_FILE_PATH` to persist logs across restarts.
+
 ---
 
 ## Usage
