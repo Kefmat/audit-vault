@@ -141,6 +141,16 @@ If you discover a security vulnerability within Audit Vault, please submit a rep
 
 ---
 
+## Testing
+
+Run the test suite with:
+
+```bash
+pytest tests/
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting a Pull Request.
