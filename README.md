@@ -153,7 +153,12 @@ curl -X GET "http://localhost:8080/v1/audit/events?limit=20&offset=0" \
 
 ## Security & Compliance
 
-If you discover a security vulnerability within Audit Vault, please submit a report to `security@example.com` or create a confidential disclosure.
+If you discover a security vulnerability within Audit Vault, please follow responsible disclosure:
+
+1. **Do not** open a public GitHub issue.
+2. Email a report to `security@example.com` with a description, reproduction steps, and potential impact.
+3. You will receive an acknowledgement within 48 hours.
+4. A patch will be coordinated and released before public disclosure.
 
 ---
 
