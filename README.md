@@ -139,6 +139,13 @@ curl -X GET http://localhost:8080/v1/audit/verify \
   -H "Authorization: Bearer YOUR_API_TOKEN"
 ```
 
+#### Retrieving Recent Events
+
+```bash
+curl -X GET "http://localhost:8080/v1/audit/events?limit=20&offset=0" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
 ---
 
 ## Security & Compliance
