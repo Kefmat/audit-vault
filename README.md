@@ -152,6 +152,12 @@ Run the test suite with:
 pytest tests/
 ```
 
+To include a coverage report:
+
+```bash
+pytest tests/ --cov=src
+```
+
 ---
 
 ## Contributing
