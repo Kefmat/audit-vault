@@ -67,6 +67,7 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/Kefmat/audit-vault.git
 cd audit-vault
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
