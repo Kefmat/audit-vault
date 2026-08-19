@@ -75,6 +75,8 @@ pip install -r requirements.txt
 
 Create a `.env` file from the provided template:
 
+> The application uses `python-dotenv` to load environment variables automatically at startup.
+
 ```bash
 cp .env.example .env
 ```
