@@ -86,7 +86,7 @@ Configure your vault settings in `.env`:
 ```env
 HOST=0.0.0.0
 PORT=8080
-LOG_LEVEL=info
+LOG_LEVEL=info # options: debug, info, warning, error
 VAULT_SECRET_KEY=your-secure-vault-key
 STORAGE_DRIVER=memory # options: memory, file
 VAULT_FILE_PATH=vault_log.jsonl
