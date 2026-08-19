@@ -39,6 +39,7 @@
 - **Role-Based Access Control (RBAC)**: Strict permission boundaries for reading, auditing, and administering logs.
 - **Compliance-Ready**: Designed to meet requirements for SOC2, HIPAA, ISO 27001, and GDPR audit trails.
 - **Seamless Integrations**: Out-of-the-box connectors for Webhooks, SIEM tools, and Cloud Storage.
+- **Queryable Event Log**: Paginated REST API for retrieving and filtering audit events by actor, action, or time range.
 
 ---
 
