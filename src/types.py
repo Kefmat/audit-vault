@@ -55,6 +55,15 @@ class AuditEvent:
             f"action={self.action!r}, target={self.target!r})"
         )
 
+    def __eq__(self, other: object) -> bool:
+        """Two events are equal when they share the same event_id."""
+        if not isinstance(other, AuditEvent):
+            return NotImplemented
+        return self.event_id == other.event_id
+
+    def __hash__(self) -> int:
+        return hash(self.event_id)
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "AuditEvent":
         return cls(
