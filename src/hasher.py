@@ -35,3 +35,12 @@ def compute_pair_hash(left_hash: str, right_hash: str) -> str:
 def hash_string(value: str) -> str:
     """Computes SHA-256 hash of an arbitrary UTF-8 string."""
     return hashlib.sha256(value.encode('utf-8')).hexdigest()
+
+
+def compute_genesis_hash() -> str:
+    """Returns the canonical genesis hash used as the previous_hash for the first event in a chain.
+
+    Using a fixed well-known sentinel value rather than an empty string makes the
+    chain anchor explicit and prevents accidental divergence across implementations.
+    """
+    return hash_string("audit-vault-genesis")
