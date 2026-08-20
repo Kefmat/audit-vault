@@ -42,7 +42,8 @@ def main():
 
     server = create_server(config.host, config.port, storage, api_token=config.api_token)
     logger.info(f"Service running on http://{config.host}:{config.port}")
-    logger.info(f"API Auth Token: {config.api_token}")
+    masked_token = f"{'*' * (len(config.api_token) - 4)}{config.api_token[-4:]}"
+    logger.info(f"API Auth Token: {masked_token}")
 
     try:
         server.serve_forever()
