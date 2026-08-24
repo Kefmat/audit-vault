@@ -203,3 +203,9 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) gu
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes across versions.
