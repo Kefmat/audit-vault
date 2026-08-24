@@ -3,6 +3,7 @@
 > A secure, high-performance, and tamper-evident audit logging and vault system designed for modern cloud and enterprise applications.
 
 ![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue?style=flat-square&logo=python)
+![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)
 
 ---
 
