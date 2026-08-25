@@ -4,6 +4,7 @@ import os
 import unittest
 import tempfile
 import threading
+from src.storage.base import GENESIS_HASH
 from src.storage.memory import MemoryVaultStorage
 from src.storage.file import FileVaultStorage
 from src.types import AuditEvent
@@ -16,7 +17,7 @@ class TestVaultStorage(unittest.TestCase):
         ev1 = storage.append_event(AuditEvent(actor="u1", action="user.login", target="sys"))
         ev2 = storage.append_event(AuditEvent(actor="u2", action="user.logout", target="sys"))
 
-        self.assertEqual(ev1.previous_hash, "GENESIS_BLOCK_PREVIOUS_HASH")
+        self.assertEqual(ev1.previous_hash, GENESIS_HASH)
         self.assertEqual(ev2.previous_hash, ev1.hash)
 
         verification = storage.verify_integrity()
