@@ -18,7 +18,7 @@ class TestHasher(unittest.TestCase):
         data1 = {"b": 1, "a": 2, "c": {"z": 10, "y": 20}}
         data2 = {"a": 2, "c": {"y": 20, "z": 10}, "b": 1}
         self.assertEqual(canonical_json(data1), canonical_json(data2))
-        self.assertEqual(canonical_json(data1), '{"a":2,"c":{"y":20,"z":10},"b":1}')
+        self.assertEqual(canonical_json(data1), '{"a":2,"b":1,"c":{"y":20,"z":10}}')
 
     def test_hash_string(self):
         val = "audit-vault-test"
