@@ -2,10 +2,11 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
+from src.hasher import compute_genesis_hash
 from src.types import AuditEvent, VerificationResult, MerkleProof
 
 
-GENESIS_HASH = "GENESIS_BLOCK_PREVIOUS_HASH"
+GENESIS_HASH = compute_genesis_hash()
 
 
 class VaultStorage(ABC):
